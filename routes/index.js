@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import Course from '../models/course.js';
 const router = Router();
 
 router.get('/', (req, res) => {
@@ -15,15 +16,46 @@ router.get('/add', (req, res) => {
     })
 })
 
-router.post('/add', (req, res) => {
-    console.log(req.body);
+router.post('/add', async (req, res) => {
+    const { title, price, img } = req.body
+    const cousre = new Course(title, price, img)
+    await cousre.save()
     res.redirect('/courses')
 })
 
-router.get('/courses', (req, res) => {
+router.get('/courses', async (req, res) => {
+    const courses = await Course.getAll()
     res.render('courses', {
         title: 'Courses',
-        isCourses: true
+        isCourses: true,
+        courses
+    })
+})
+
+router.get('/courses/:id/edit', async (req, res) => {
+    if (!req.query.allow) {
+        return redirect('/')
+    }
+
+    const course = await Course.genOne(req.params.id)
+
+    res.render('course-edit', {
+        title: `Edit ${course.title}`,
+        course
+    })
+})
+
+router.post('/courses/edit', async (req, res) => {
+    await Course.update(req.body)
+    res.redirect('/courses')
+})
+
+router.get('/courses/:id', async (req, res) => {
+    const course = await Course.genOne(req.params.id)
+    res.render('course', {
+        layout: 'empty',
+        title: `Course ${course.title}`,
+        course
     })
 })
 
