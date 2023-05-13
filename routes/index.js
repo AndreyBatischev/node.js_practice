@@ -59,4 +59,6 @@ router.get('/courses/:id', async (req, res) => {
     })
 })
 
+
+
 export default router;

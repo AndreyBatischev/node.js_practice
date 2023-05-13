@@ -1,6 +1,8 @@
 import express from 'express'
 import exphbs from 'express-handlebars'
 import routes from './routes/index.js'
+import cardRoute from './routes/cardRoute.js'
+import path from 'path'
 
 
 import { fileURLToPath } from 'url';
@@ -20,10 +22,11 @@ app.engine('hbs', hbs.engine)
 app.set('view engine', 'hbs')
 app.set('views', 'views')
 
-app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/', routes)
+app.use('/card', cardRoute)
 
 const PORT = process.env.PORT || 3000
 
