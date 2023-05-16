@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import Course from '../models/course.js';
-import Card from '../models/card.js';
 const router = Router();
 
 router.post('/add', async (req, res) => {
-    const course = await Course.genOne(req.body.id)
-    await Card.add(course)
+    const course = await Course.findById(req.body.id)
+    await req.user.addToCart(course)
     res.redirect('/card')
 })
 
@@ -15,15 +14,16 @@ router.delete('/remove/:id', async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
-    const card = await Card.fetch()
+    // const card = await Card.fetch()
 
-    res.render('card', {
-        title: 'Bascket',
-        isCard: true,
-        courses: card.courses,
-        price: card.price
+    // res.render('card', {
+    //     title: 'Bascket',
+    //     isCard: true,
+    //     courses: card.courses,
+    //     price: card.price
 
-    })
+    // })
+    res.json({ test: true })
 })
 
 export default router
