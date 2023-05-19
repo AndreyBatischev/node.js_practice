@@ -3,6 +3,7 @@ import exphbs from 'express-handlebars'
 import mongoose from 'mongoose'
 import routes from './routes/index.js'
 import cardRoute from './routes/cardRoute.js'
+import ordersRoute from './routes/ordersRoute.js'
 import User from './models/user.js'
 import path from 'path'
 
@@ -44,6 +45,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use('/', routes)
 app.use('/card', cardRoute)
+app.use('/orders', ordersRoute)
 
 const PORT = process.env.PORT || 3000
 

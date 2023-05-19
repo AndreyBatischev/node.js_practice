@@ -22,4 +22,12 @@ const Course = new Schema({
     }
 })
 
+Course.method('toClient', function () {
+    const course = this.toObject()
+
+    course.id = course._id
+    delete course._id
+    return course
+})
+
 export default model('Course', Course)
