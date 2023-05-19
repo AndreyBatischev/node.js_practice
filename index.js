@@ -2,8 +2,9 @@ import express from 'express'
 import exphbs from 'express-handlebars'
 import mongoose from 'mongoose'
 import routes from './routes/index.js'
-import cardRoute from './routes/cardRoute.js'
-import ordersRoute from './routes/ordersRoute.js'
+import cardRoutes from './routes/cardRoutes.js'
+import ordersRoutes from './routes/ordersRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 import User from './models/user.js'
 import path from 'path'
 
@@ -44,8 +45,9 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/', routes)
-app.use('/card', cardRoute)
-app.use('/orders', ordersRoute)
+app.use('/card', cardRoutes)
+app.use('/orders', ordersRoutes)
+app.use('/auth', authRoutes)
 
 const PORT = process.env.PORT || 3000
 

@@ -1,0 +1,55 @@
+<div class="auth">
+    <div class="row">
+        <div class="col s12">
+        <ul class="tabs">
+            <li class="tab col s6  "><a class="active" href="#login">Login</a></li>
+            <li class="tab col s6  "><a href="#register">Singup</a></li>
+
+        </ul>
+        </div>
+        <div id="login" class="col s6 offset-s3">
+            <h2>Login to shop</h2>
+            <form action="/add" method="POST">
+                <div class="input-field ">
+                    <input placeholder="Email" name="email" id="email" type="email" class="validate" required>
+                    <label for="email">Email</label>
+                    <span class="helper-text" data-error="Add Email" ></span>
+                    
+                </div>
+
+                <div class="input-field ">
+                    <input placeholder="Password" name="password" id="password" type="password" class="validate" required>
+                    <label for="password">Password</label>
+                    <span class="helper-text" data-error="Add password" ></span>
+                    
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+        <div id="register" class="col s6 offset-s3">
+            <h2>Singin in shop</h2>
+             <form action="/add" method="POST">
+                <div class="input-field ">
+                    <input placeholder="Email" name="email" id="remail" type="email" class="validate" required>
+                    <label for="remail">Email</label>
+                    <span class="helper-text" data-error="Add Email" ></span>
+                    
+                </div>
+
+                <div class="input-field ">
+                    <input placeholder="Password" name="password" id="rpassword" type="password" class="validate" required>
+                    <label for="rpassword">Password</label>
+                    <span class="helper-text" data-error="Add password" ></span>
+                </div>
+
+                <div class="input-field ">
+                    <input placeholder="Confirm" name="confirm" id="confirm" type="password" class="validate" required>
+                    <label for="confirm">Confirm password</label>
+                    <span class="helper-text" data-error="Confirm password" ></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Singin</button>
+            </form>
+        </div>
+
+    </div>
+</div>
