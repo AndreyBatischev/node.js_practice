@@ -1,16 +1,23 @@
 import express from 'express'
 import exphbs from 'express-handlebars'
+import session from 'express-session'
+import csrf from 'csurf'
+import flash from 'connect-flash'
+import { default as connectMongoDBSession } from 'connect-mongodb-session';
 import mongoose from 'mongoose'
 import routes from './routes/index.js'
 import cardRoutes from './routes/cardRoutes.js'
 import ordersRoutes from './routes/ordersRoutes.js'
 import authRoutes from './routes/authRoutes.js'
-import User from './models/user.js'
 import path from 'path'
-
+import varMiddleware from './middleware/variables.js'
+import userMiddleware from './middleware/user.js';
+import keys from './keys/index.js'
 
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
+
+
 
 const app = express()
 
@@ -27,22 +34,31 @@ const hbs = exphbs.create({
     }
 })
 
+
+const MongoDBStore = connectMongoDBSession(session);
+
+var store = new MongoDBStore({
+    collection: 'sessions',
+    uri: keys.DB_URL
+});
+
 app.engine('hbs', hbs.engine)
 app.set('view engine', 'hbs')
 app.set('views', 'views')
 
-app.use(async (req, res, next) => {
-    try {
-        const user = await User.findById('6450fb2c7ed7bfe922391726')
-        req.user = user
-        next()
-    } catch (error) {
-        console.log(error);
-    }
-})
-
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true }))
+
+app.use(session({
+    secret: keys.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store
+}))
+app.use(csrf())
+app.use(flash())
+app.use(varMiddleware)
+app.use(userMiddleware)
 
 app.use('/', routes)
 app.use('/card', cardRoutes)
@@ -55,19 +71,8 @@ const PORT = process.env.PORT || 3000
 
 async function start() {
     try {
-        const DB_URL = 'mongodb+srv://user:user123qwe@restapi.gbi9szb.mongodb.net/?retryWrites=true&w=majority';
-        await mongoose.connect(DB_URL, { useNewUrlParser: true })
 
-        const candidate = await User.findOne()
-        if (!candidate) {
-            const user = new User({
-                email: 'asd@asd.ru',
-                name: 'Andrey',
-                cart: { items: [] }
-            })
-
-            await user.save()
-        }
+        await mongoose.connect(keys.DB_URL, { useNewUrlParser: true })
 
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);

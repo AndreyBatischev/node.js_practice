@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import Course from '../models/course.js';
+import authMiddleware from '../middleware/auth.js';
+
 const router = Router();
 
 
@@ -17,13 +19,13 @@ function computePrice(courses) {
     }, 0)
 }
 
-router.post('/add', async (req, res) => {
+router.post('/add', authMiddleware, async (req, res) => {
     const course = await Course.findById(req.body.id)
     await req.user.addToCart(course)
     res.redirect('/card')
 })
 
-router.delete('/remove/:id', async (req, res) => {
+router.delete('/remove/:id', authMiddleware, async (req, res) => {
     await req.user.removeFromCarts(req.params.id)
     const user = await req.user.populate('cart.items.courseId')
 
@@ -34,7 +36,7 @@ router.delete('/remove/:id', async (req, res) => {
     res.status(200).json(cart)
 })
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
     const user = await req.user
         .populate('cart.items.courseId')
     // .execPopulate()

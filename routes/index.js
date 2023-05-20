@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Course from '../models/course.js';
+import authMiddleware from '../middleware/auth.js';
 const router = Router();
 
 router.get('/', (req, res) => {
@@ -9,14 +10,14 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/add', (req, res) => {
+router.get('/add', authMiddleware, (req, res) => {
     res.render('addCourse', {
         title: 'Add new course',
         isAdd: true
     })
 })
 
-router.post('/add', async (req, res) => {
+router.post('/add', authMiddleware, async (req, res) => {
     const { title, price, img } = req.body
     const cousre = new Course({ title, price, img, userId: req.user._id })
 
@@ -41,7 +42,7 @@ router.get('/courses', async (req, res) => {
     })
 })
 
-router.get('/courses/:id/edit', async (req, res) => {
+router.get('/courses/:id/edit', authMiddleware, async (req, res) => {
     if (!req.query.allow) {
         return redirect('/')
     }
@@ -54,14 +55,14 @@ router.get('/courses/:id/edit', async (req, res) => {
     })
 })
 
-router.post('/courses/edit', async (req, res) => {
+router.post('/courses/edit', authMiddleware, async (req, res) => {
     const { id } = req.body
     delete req.body.id
     await Course.findByIdAndUpdate(id, req.body)
     res.redirect('/courses')
 })
 
-router.post('/courses/remove', async (req, res) => {
+router.post('/courses/remove', authMiddleware, async (req, res) => {
     try {
         await Course.findByIdAndDelete(req.body.id)
         res.status(200).redirect('/courses')
