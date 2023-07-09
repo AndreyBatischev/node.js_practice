@@ -13,6 +13,7 @@ import path from 'path'
 import varMiddleware from './middleware/variables.js'
 import userMiddleware from './middleware/user.js';
 import keys from './keys/index.js'
+import helper from './utils/hbs-helpers.js'
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -27,6 +28,7 @@ const __dirname = dirname(__filename);
 const hbs = exphbs.create({
     defaultLayout: 'main',
     extname: 'hbs',
+    helpers: helper,
     runtimeOptions: {
         allowProtoPropertiesByDefault: function (key) {
             return ['img', 'title', 'price'].includes(key);

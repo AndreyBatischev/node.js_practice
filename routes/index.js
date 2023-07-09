@@ -31,35 +31,63 @@ router.post('/add', authMiddleware, async (req, res) => {
 })
 
 router.get('/courses', async (req, res) => {
-    const courses = await Course.find({})
-        .populate('userId', 'email name')
-        .select('price title img')
+    try {
+        const courses = await Course.find({})
+            .populate('userId', 'email name')
+            .select('price title img')
 
-    res.render('courses', {
-        title: 'Courses',
-        isCourses: true,
-        courses
-    })
+        res.render('courses', {
+            title: 'Courses',
+            isCourses: true,
+            userId: req.user ? req.user._id : null,
+            courses
+        })
+    } catch (error) {
+        console.log(error);
+    }
+
 })
+
+function isOwner(course, req) {
+    return course.userId.toString() !== req.user._id.toString()
+}
 
 router.get('/courses/:id/edit', authMiddleware, async (req, res) => {
     if (!req.query.allow) {
         return redirect('/')
     }
 
-    const course = await Course.findById(req.params.id)
+    try {
+        const course = await Course.findById(req.params.id)
 
-    res.render('course-edit', {
-        title: `Edit ${course.title}`,
-        course
-    })
+        if (isOwner(course, req)) {
+            return res.redirect('/courses')
+        }
+
+        res.render('course-edit', {
+            title: `Edit ${course.title}`,
+            course
+        })
+    } catch (error) {
+        console.log(error);
+    }
+
 })
 
 router.post('/courses/edit', authMiddleware, async (req, res) => {
-    const { id } = req.body
-    delete req.body.id
-    await Course.findByIdAndUpdate(id, req.body)
-    res.redirect('/courses')
+    try {
+        const { id } = req.body
+        delete req.body.id
+        const course = await Course.findById(id)
+        if (isOwner(course, req)) {
+            return res.redirect('/courses')
+        }
+        Object.assign(course, req.body)
+        await course.save()
+        res.redirect('/courses')
+    } catch (error) {
+        console.log(error);
+    }
 })
 
 router.post('/courses/remove', authMiddleware, async (req, res) => {
