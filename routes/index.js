@@ -1,7 +1,13 @@
 import { Router } from 'express';
 import Course from '../models/course.js';
 import authMiddleware from '../middleware/auth.js';
+import { validationResult } from 'express-validator';
+import * as formValidators from '../utils/validators.js';
 const router = Router();
+
+function isOwner(course, req) {
+    return course.userId.toString() === req.user._id.toString()
+}
 
 router.get('/', (req, res) => {
     res.render('index', {
@@ -17,8 +23,22 @@ router.get('/add', authMiddleware, (req, res) => {
     })
 })
 
-router.post('/add', authMiddleware, async (req, res) => {
+router.post('/add', authMiddleware, formValidators.coursValidators, async (req, res) => {
+    const errors = validationResult(req)
     const { title, price, img } = req.body
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render('addCourse', {
+            title: 'Add new course',
+            isAdd: true,
+            error: errors.array()[0].msg,
+            data: {
+                title, price, img
+            }
+        })
+    }
+
+
     const cousre = new Course({ title, price, img, userId: req.user._id })
 
     try {
@@ -48,9 +68,6 @@ router.get('/courses', async (req, res) => {
 
 })
 
-function isOwner(course, req) {
-    return course.userId.toString() !== req.user._id.toString()
-}
 
 router.get('/courses/:id/edit', authMiddleware, async (req, res) => {
     if (!req.query.allow) {
@@ -60,7 +77,7 @@ router.get('/courses/:id/edit', authMiddleware, async (req, res) => {
     try {
         const course = await Course.findById(req.params.id)
 
-        if (isOwner(course, req)) {
+        if (!isOwner(course, req)) {
             return res.redirect('/courses')
         }
 
@@ -74,9 +91,16 @@ router.get('/courses/:id/edit', authMiddleware, async (req, res) => {
 
 })
 
-router.post('/courses/edit', authMiddleware, async (req, res) => {
+router.post('/courses/edit', authMiddleware, formValidators.coursValidators, async (req, res) => {
+    const errors = validationResult(req)
+    const { id } = req.body
+
+    if (!errors.isEmpty()) {
+        return res.status(422).redirect(`/courses/${id}/edit?allow=true`)
+    }
+
+
     try {
-        const { id } = req.body
         delete req.body.id
         const course = await Course.findById(id)
         if (isOwner(course, req)) {
@@ -92,7 +116,10 @@ router.post('/courses/edit', authMiddleware, async (req, res) => {
 
 router.post('/courses/remove', authMiddleware, async (req, res) => {
     try {
-        await Course.findByIdAndDelete(req.body.id)
+        await Course.findByIdAndDelete({
+            _id: req.body.id,
+            userId: req.user._id
+        })
         res.status(200).redirect('/courses')
     } catch (error) {
         console.log(error);

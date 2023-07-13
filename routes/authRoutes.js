@@ -6,8 +6,8 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import contentMail from '../emails/registration.js';
 import resetPassword from '../emails/reset.js';
-
-
+import { validationResult } from 'express-validator';
+import * as formValidators from '../utils/validators.js';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -65,21 +65,22 @@ router.post('/login', async (req, res) => {
 
 })
 
-router.post('/register', async (req, res) => {
+router.post('/register', formValidators.registerValidators, async (req, res) => {
     try {
-        const { email, password, repeat, name } = req.body
-        const candidate = await User.findOne({ email })
+        const { email, password, name } = req.body
 
-        if (candidate) {
-            req.flash('registerError', 'User with this email already exists')
-            res.redirect('/auth/login#register')
-        } else {
-            const hashPassword = await bcrypt.hash(password, 10)
-            const user = new User({ email, name, password: hashPassword, cart: { items: [] } })
-            await user.save()
-            await transporter.sendMail(contentMail(email))
-            res.redirect('/auth/login#login')
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            req.flash('registerError', errors.array()[0].msg)
+            return res.status(422).redirect('/auth/login#register')
         }
+
+        const hashPassword = await bcrypt.hash(password, 10)
+        const user = new User({ email, name, password: hashPassword, cart: { items: [] } })
+        await user.save()
+        await transporter.sendMail(contentMail(email))
+        res.redirect('/auth/login#login')
 
     } catch (error) {
         console.log(error);

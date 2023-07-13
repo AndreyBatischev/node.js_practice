@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Course from '../models/course.js';
 import authMiddleware from '../middleware/auth.js';
 
+
 const router = Router();
 
 

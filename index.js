@@ -14,16 +14,17 @@ import varMiddleware from './middleware/variables.js'
 import userMiddleware from './middleware/user.js';
 import keys from './keys/index.js'
 import helper from './utils/hbs-helpers.js'
+import errorHandler from './middleware/error404.js'
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
-
 
 const app = express()
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const PORT = process.env.PORT || 3000
 
 const hbs = exphbs.create({
     defaultLayout: 'main',
@@ -35,7 +36,6 @@ const hbs = exphbs.create({
         }
     }
 })
-
 
 const MongoDBStore = connectMongoDBSession(session);
 
@@ -67,9 +67,7 @@ app.use('/card', cardRoutes)
 app.use('/orders', ordersRoutes)
 app.use('/auth', authRoutes)
 
-const PORT = process.env.PORT || 3000
-
-
+app.use(errorHandler)
 
 async function start() {
     try {
