@@ -16,6 +16,11 @@ const User = new Schema({
         required: true
     },
 
+    avatarUrl: {
+        type: String,
+        required: false
+    },
+
     resetToken: {
         type: String,
         required: false
